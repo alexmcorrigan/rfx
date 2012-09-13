@@ -6,7 +6,8 @@ class YahooFXServer
     def initialize
         now = Time.now
         timestamp = now.strftime("%Y%m%d-%H%M%S")
-        file = File.open("./log/YahooFXServer-#{timestamp}.log", File::WRONLY | File::APPEND | File::CREAT)
+        FileUtils.mkdir_p './logs/'
+        file = File.open("./logs/YahooFXServer-#{timestamp}.log", File::WRONLY | File::APPEND | File::CREAT)
         @log = Logger.new(file)
         @log.level = Logger::INFO
         @yqlHost = 'http://query.yahooapis.com/v1/public/'
