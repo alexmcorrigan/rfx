@@ -15,19 +15,21 @@ class YahooFXServer
     end
 
     def fetchFor base_currency_code, quote_currency_code
-        if fails_validation(base_currency_code, quote_currency_code)
+        @base_currency_code = base_currency_code
+        @quote_currency_code = quote_currency_code
+        if fails_validation
             @log.info "Failed validation, will not request exchange rate."
             return @error.join("\n")
         end
-        get_request = URI(@yqlHost + create_query_for_currency_pair(base_currency_code, quote_currency_code))
+        get_request = URI(@yqlHost + create_query_for_currency_pair)
         execute_request(get_request)
         extract_rate(@body)
     end
 
     private
 
-    def create_query_for_currency_pair base_currency_code, quote_currency_code
-        "yql?q=select%20*%20from%20yahoo.finance.xchange%20where%20pair%20%3D%20%22#{base_currency_code}#{quote_currency_code}%22&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback="
+    def create_query_for_currency_pair
+        "yql?q=select%20*%20from%20yahoo.finance.xchange%20where%20pair%20%3D%20%22#{@base_currency_code}#{@quote_currency_code}%22&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback="
     end
 
     def extract_rate(body)
@@ -41,28 +43,28 @@ class YahooFXServer
         end
     end
 
-    def fails_validation base_currency_code, quote_currency_code
+    def fails_validation
         @error = Array.new
-        if currency_code_wrong_length(base_currency_code, quote_currency_code)
+        if currency_code_wrong_length
             return true
         end
-        if currency_code_not_known(base_currency_code, quote_currency_code)
+        if currency_code_not_known
             return true
         end
         return false
     end
 
-    def currency_code_wrong_length base_currency_code, quote_currency_code
+    def currency_code_wrong_length
         @log.info "Validating currency code lengths"
         did_fail = false
-        if base_currency_code.length != 3
-            message = "Base currency code '#{base_currency_code}' invalid, must be 3 characters"
+        if @base_currency_code.length != 3
+            message = "Base currency code '#{@base_currency_code}' invalid, must be 3 characters"
             @log.info message
             @error.push(message)
             did_fail = true
         end
-        if quote_currency_code.length != 3
-            message = "Quote currency code '#{quote_currency_code}' invalid, must be 3 characters"
+        if @quote_currency_code.length != 3
+            message = "Quote currency code '#{@quote_currency_code}' invalid, must be 3 characters"
             @log.info message
             @error.push(message)
             did_fail = true
@@ -76,16 +78,16 @@ class YahooFXServer
         doc.elements.each("currencies/currency") { | currency | @currencies[currency.attributes['code']] = currency.attributes['name'] }
     end
 
-    def currency_code_not_known(base_currency_code, quote_currency_code)
+    def currency_code_not_known
         did_fail = false
-        if @currencies.fetch(base_currency_code, nil) == nil
-            message = "Base currency code '#{base_currency_code}' not recognised"
+        if @currencies.fetch(@base_currency_code, nil) == nil
+            message = "Base currency code '#{@base_currency_code}' not recognised"
             @log.info message
             @error.push(message)
             did_fail = true
         end
-        if @currencies.fetch(quote_currency_code, nil) == nil
-            message = "Quote currency code '#{quote_currency_code}' not recognised"
+        if @currencies.fetch(@quote_currency_code, nil) == nil
+            message = "Quote currency code '#{@quote_currency_code}' not recognised"
             @log.info message
             @error.push(message)
             did_fail = true
