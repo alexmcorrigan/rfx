@@ -22,7 +22,7 @@ Given /^a quote currency (.+)$/ do | quote_currency_code |
 end
 
 When /^I request exchange rate for these two currencies$/ do
-    @rate = @fxServer.fetchFor @base_currency_code, @quote_currency_code
+    @rate = @fxServer.fetch_for @base_currency_code, @quote_currency_code
 end
 
 Then /^I receive a valid decimal exchange rate$/ do

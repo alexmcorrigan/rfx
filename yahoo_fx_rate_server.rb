@@ -1,3 +1,5 @@
+require 'rubygems'
+require 'json'
 require 'net/http'
 require 'currency_code_validator'
 
@@ -8,7 +10,7 @@ class YahooFXServer
         @currency_code_validator = CurrencyCodeValidator.new
     end
 
-    def fetchFor base_currency, quote_currency
+    def fetch_for base_currency, quote_currency
         @validation_errors = []
         perform_validation_on base_currency
         perform_validation_on quote_currency
