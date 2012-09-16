@@ -11,16 +11,11 @@ class YahooFXServer
     end
 
     def fetch_for base_currency, quote_currency
-        @validation_errors = []
         perform_validation_on base_currency
         perform_validation_on quote_currency
-        if @validation_errors.empty?
-            get_request = URI(@yqlHost + create_query_for_currency_pair(base_currency.code, quote_currency.code))
-            execute_request(get_request)
-            return extract_rate(@body)
-        else
-            return @validation_errors.join
-        end
+        get_request = URI(@yqlHost + create_query_for_currency_pair(base_currency.code, quote_currency.code))
+        execute_request(get_request)
+        return extract_rate(@body)
     end
 
 # ---------------------------------------------------------------------
@@ -43,7 +38,7 @@ class YahooFXServer
     end
 
     def perform_validation_on currency
-        @validation_errors.push(*currency.validate(@currency_code_validator))
+        currency.validate(@currency_code_validator)
     end
 
 end

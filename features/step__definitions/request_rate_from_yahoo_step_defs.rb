@@ -22,7 +22,11 @@ Given /^a quote currency (.+)$/ do | quote_currency_code |
 end
 
 When /^I request exchange rate for these two currencies$/ do
-    @rate = @fxServer.fetch_for @base_currency_code, @quote_currency_code
+    begin
+        @rate = @fxServer.fetch_for @base_currency_code, @quote_currency_code
+    rescue => e
+        @exception_message = e.message
+    end
 end
 
 Then /^I receive a valid decimal exchange rate$/ do
@@ -31,5 +35,5 @@ Then /^I receive a valid decimal exchange rate$/ do
 end
 
 Then /^"(.+)" is returned$/ do | expected_error_message |
-    @rate.should eq(expected_error_message)
+    @exception_message.should eq(expected_error_message)
 end
